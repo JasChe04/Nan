@@ -80,7 +80,7 @@ function formarTexto() {
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     
-    const lineas = ["¿QUIERES", "SER MI", "SAN VALENTIN?"];
+    const lineas = ["¿QUIERES", "SER M I", "SAN VALENTIN?"];
     lineas.forEach((linea, index) => {
         ctx.fillText(linea, width / 2, (height / 2.6) + (index * (fontSize + 18)));
     });
@@ -122,4 +122,5 @@ function animate() {
     ctx.fillRect(0, 0, width, height);
     particles.forEach(p => { p.update(); p.draw(); });
     requestAnimationFrame(animate);
+
 }
