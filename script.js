@@ -8,8 +8,8 @@ let claveIngresada = "";
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
-    canvas.width = width;
     canvas.height = height;
+    canvas.width = width;
 }
 window.addEventListener('resize', resize);
 resize();
@@ -50,23 +50,35 @@ class Particle {
         this.destX = this.x;
         this.destY = this.y;
         this.color = '#ff758f';
-        this.size = 1.8;
-        this.ease = 0.15; // Un poco más rápido para que se sienta firme
+        this.size = 2; 
+        this.ease = 0.1; 
+        this.stopped = false;
     }
     draw() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.size, this.size);
     }
     update() {
-        this.x += (this.destX - this.x) * this.ease;
-        this.y += (this.destY - this.y) * this.ease;
+        if (this.stopped) return;
+
+        let dx = this.destX - this.x;
+        let dy = this.destY - this.y;
+        
+        this.x += dx * this.ease;
+        this.y += dy * this.ease;
+
+        // Si ya está muy cerca de su destino, se detiene para dar nitidez
+        if (isForming && Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+            this.x = this.destX;
+            this.y = this.destY;
+            this.stopped = true;
+        }
     }
 }
 
 function initParticles() {
     particles = [];
-    // Aumentamos a 6000 puntos para que "MI" se rellene por completo
-    for (let i = 0; i < 6000; i++) particles.push(new Particle());
+    for (let i = 0; i < 8000; i++) particles.push(new Particle());
 }
 
 function formarTexto() {
@@ -75,35 +87,30 @@ function formarTexto() {
     
     ctx.clearRect(0, 0, width, height);
     
-    // Tamaños diferenciados para que el MI sea grande y nítido
-    const sizeGrande = width < 500 ? 24 : 35;
-    const sizeMI = width < 500 ? 32 : 45; // El "MI" será más grande para capturar más puntos
-    
+    // Ajuste de fuente para máxima claridad en móvil
+    const fontSize = width < 500 ? 20 : 35;
+    ctx.font = `bold ${fontSize}px 'Press Start 2P'`;
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     
-    // Dibujamos las líneas con diferentes tamaños
-    ctx.font = `bold ${sizeGrande}px 'Press Start 2P'`;
-    ctx.fillText("¿QUIERES", width / 2, height / 2.8);
-    
-    ctx.font = `bold ${sizeMI}px 'Press Start 2P'`;
-    ctx.fillText("SER MI", width / 2, height / 2.8 + (sizeGrande + 25));
-    
-    ctx.font = `bold ${sizeGrande}px 'Press Start 2P'`;
-    ctx.fillText("VALENTIN?", width / 2, height / 2.8 + (sizeGrande + sizeMI + 40));
+    // Escribimos las líneas
+    ctx.fillText("¿QUIERES", width / 2, height / 3);
+    ctx.fillText("SER MI", width / 2, height / 3 + (fontSize + 20));
+    ctx.fillText("VALENTIN?", width / 2, height / 3 + (fontSize * 2 + 40));
 
-    // ESCANEO DE ALTA DEFINICIÓN (Paso 2: revisa casi cada pixel)
     const data = ctx.getImageData(0, 0, width, height).data;
     let positions = [];
-    for (let y = 0; y < height; y += 2) { 
-        for (let x = 0; x < width; x += 2) {
+    
+    // Escaneo pixel por pixel (Paso 1) para que no se pierda nada de la "M"
+    for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
             if (data[(y * width + x) * 4 + 3] > 128) {
                 positions.push({ x, y });
             }
         }
     }
 
-    // Mezclamos posiciones para el efecto visual
+    // Mezcla aleatoria para que el efecto sea bonito
     positions.sort(() => Math.random() - 0.5);
 
     for (let i = 0; i < particles.length; i++) {
@@ -111,32 +118,38 @@ function formarTexto() {
             particles[i].destX = positions[i].x;
             particles[i].destY = positions[i].y;
             particles[i].color = "#ff4d6d";
-            particles[i].size = 2.2; // Puntos ligeramente más grandes para nitidez
+            particles[i].size = 2; // Tamaño uniforme
         } else {
+            // El resto de puntos se va a los bordes
             particles[i].destX = Math.random() * width;
-            particles[i].destY = Math.random() * height;
-            particles[i].color = "#150000";
-            particles[i].size = 1;
+            particles[i].destY = height + 50; 
+            particles[i].color = "transparent";
         }
     }
 
     setTimeout(() => {
         document.getElementById('contenedor-respuestas').classList.remove('oculto');
-    }, 1800);
+    }, 2000);
 }
 
 function finalizar(colorElegido) {
     document.getElementById('contenedor-respuestas').classList.add('oculto');
     document.getElementById('pantalla-final').classList.remove('oculto');
     particles.forEach(p => {
+        p.stopped = false; // Permitir que se muevan de nuevo
         p.color = colorElegido === 'rojo' ? '#ff0000' : '#8b4513';
-        p.destY += 40;
+        p.destY += 30;
     });
 }
 
 function animate() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    // Menos rastro para que las letras se vean limpias
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fillRect(0, 0, width, height);
-    particles.forEach(p => { p.update(); p.draw(); });
+    
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
     requestAnimationFrame(animate);
 }
