@@ -15,7 +15,7 @@ window.addEventListener('resize', resize);
 resize();
 
 function irAClave() {
-    document.getElementById('pantalla-1').classList.add('oculto');
+    document.getElementById('pantalla-1').classList.add('ocult
     document.getElementById('pantalla-clave').classList.remove('oculto');
 }
 
@@ -96,7 +96,7 @@ function formarTexto() {
     // Escribimos las líneas
     ctx.fillText("¿QUIERES", width / 2, height / 3);
     ctx.fillText("SER MI", width / 2, height / 3 + (fontSize + 20));
-    ctx.fillText("VALENTIN?", width / 2, height / 3 + (fontSize * 2 + 40));
+    ctx.fillText("SAN VALENTIN?", width / 2, height / 3 + (fontSize * 2 + 40));
 
     const data = ctx.getImageData(0, 0, width, height).data;
     let positions = [];
@@ -153,3 +153,4 @@ function animate() {
     });
     requestAnimationFrame(animate);
 }
+
