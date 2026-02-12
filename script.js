@@ -50,8 +50,8 @@ class Particle {
         this.destX = this.x;
         this.destY = this.y;
         this.color = '#ff758f';
-        this.size = 1.8; 
-        this.ease = 0.12; 
+        this.size = 2.2; // Un poco más grandes para rellenar mejor
+        this.ease = 0.15; 
         this.stopped = false;
     }
     draw() {
@@ -74,8 +74,8 @@ class Particle {
 
 function initParticles() {
     particles = [];
-    // 8500 partículas para rellenar perfectamente ambos textos
-    for (let i = 0; i < 8500; i++) particles.push(new Particle());
+    // 9000 partículas para asegurar que las letras gigantes se vean sólidas
+    for (let i = 0; i < 9000; i++) particles.push(new Particle());
 }
 
 function formarTexto() {
@@ -84,29 +84,33 @@ function formarTexto() {
     
     ctx.clearRect(0, 0, width, height);
     
-    // Tamaños de fuente optimizados para móvil
-    const fontSizePrincipal = width < 500 ? 18 : 30;
-    const fontSizeSub = width < 500 ? 9 : 14; // Letra más pequeña para la frase larga
+    // TAMAÑOS MAXIMIZADOS PARA CELULAR
+    // Usamos el ancho de la pantalla para calcular el tamaño ideal
+    const fontSizePrincipal = width * 0.075; // Letra gigante proporcional
+    const fontSizeSub = width * 0.045;       // Letra de abajo también grande y legible
     
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     
-    // Texto 1: La pregunta
-    ctx.font = `bold ${fontSizePrincipal}px 'Press Start 2P'`;
-    ctx.fillText("¿QUIERES", width / 2, height / 4);
-    ctx.fillText("SER MI", width / 2, height / 4 + (fontSizePrincipal + 15));
-    ctx.fillText("VALENTIN?", width / 2, height / 4 + (fontSizePrincipal * 2 + 30));
+    // Posicionamiento vertical dinámico para que nada se choque
+    const centroY = height / 2.5;
 
-    // Texto 2: La promesa (debajo)
+    // BLOQUE 1: LA PREGUNTA
+    ctx.font = `bold ${fontSizePrincipal}px 'Press Start 2P'`;
+    ctx.fillText("¿QUIERES", width / 2, centroY - (fontSizePrincipal * 1.5));
+    ctx.fillText("SER MI", width / 2, centroY);
+    ctx.fillText("VALENTIN?", width / 2, centroY + (fontSizePrincipal * 1.5));
+
+    // BLOQUE 2: LA PROMESA (Ahora mucho más grande)
     ctx.font = `bold ${fontSizeSub}px 'Press Start 2P'`;
-    ctx.fillStyle = "#ff758f"; // Color rosado para resaltar la frase
-    ctx.fillText("TE ASEGURO QUE", width / 2, height / 4 + (fontSizePrincipal * 3 + 60));
-    ctx.fillText("VALDRA LA PENA", width / 2, height / 4 + (fontSizePrincipal * 3 + fontSizeSub + 75));
+    ctx.fillStyle = "#ff758f"; 
+    ctx.fillText("TE ASEGURO QUE", width / 2, centroY + (fontSizePrincipal * 2.5) + 20);
+    ctx.fillText("VALDRA LA PENA", width / 2, centroY + (fontSizePrincipal * 2.5) + fontSizeSub + 40);
 
     const data = ctx.getImageData(0, 0, width, height).data;
     let positions = [];
     
-    // Escaneo de ultra-precisión
+    // Escaneo pixel a pixel para nitidez absoluta
     for (let y = 0; y < height; y += 1) {
         for (let x = 0; x < width; x += 1) {
             if (data[(y * width + x) * 4 + 3] > 128) {
@@ -121,8 +125,9 @@ function formarTexto() {
         if (positions[i]) {
             particles[i].destX = positions[i].x;
             particles[i].destY = positions[i].y;
-            particles[i].color = i > positions.length * 0.7 ? "#ff758f" : "#ff4d6d"; 
-            particles[i].size = 2;
+            particles[i].color = i > positions.length * 0.8 ? "#ff758f" : "#ff4d6d"; 
+            particles[i].size = 2.5; // Partículas más gruesas para letras más nítidas
+            particles[i].stopped = false;
         } else {
             particles[i].destX = Math.random() * width;
             particles[i].destY = height + 100; 
@@ -130,9 +135,10 @@ function formarTexto() {
         }
     }
 
+    // Retrasamos un poco los botones para que Nancy pueda leer el texto primero
     setTimeout(() => {
         document.getElementById('contenedor-respuestas').classList.remove('oculto');
-    }, 2500);
+    }, 3000);
 }
 
 function finalizar(colorElegido) {
@@ -141,12 +147,12 @@ function finalizar(colorElegido) {
     particles.forEach(p => {
         p.stopped = false;
         p.color = colorElegido === 'rojo' ? '#ff0000' : '#8b4513';
-        p.destY += 20;
+        p.destY += 30;
     });
 }
 
 function animate() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
     ctx.fillRect(0, 0, width, height);
     particles.forEach(p => {
         p.update();
