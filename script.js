@@ -50,12 +50,13 @@ class Particle {
         this.destX = this.x;
         this.destY = this.y;
         this.color = '#ff758f';
-        this.size = 2.2; // Un poco más grandes para rellenar mejor
-        this.ease = 0.15; 
+        this.size = 2.5; // Puntos más grandes para evitar huecos
+        this.ease = 0.12; 
         this.stopped = false;
     }
     draw() {
         ctx.fillStyle = this.color;
+        // Dibujamos rectángulos para un look pixel más sólido
         ctx.fillRect(this.x, this.y, this.size, this.size);
     }
     update() {
@@ -74,8 +75,7 @@ class Particle {
 
 function initParticles() {
     particles = [];
-    // 9000 partículas para asegurar que las letras gigantes se vean sólidas
-    for (let i = 0; i < 9000; i++) particles.push(new Particle());
+    for (let i = 0; i < 10000; i++) particles.push(new Particle());
 }
 
 function formarTexto() {
@@ -84,33 +84,37 @@ function formarTexto() {
     
     ctx.clearRect(0, 0, width, height);
     
-    // TAMAÑOS MAXIMIZADOS PARA CELULAR
-    // Usamos el ancho de la pantalla para calcular el tamaño ideal
-    const fontSizePrincipal = width * 0.075; // Letra gigante proporcional
-    const fontSizeSub = width * 0.045;       // Letra de abajo también grande y legible
+    // CALCULO DE TAMAÑO GIGANTE
+    // Dividimos por el número de letras de la palabra más larga para que quepa justo
+    const fontSizePrincipal = Math.floor(width / 9); 
+    const fontSizeSub = Math.floor(width / 14); 
     
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = "white";
     
-    // Posicionamiento vertical dinámico para que nada se choque
-    const centroY = height / 2.5;
+    // Ajustamos la posición inicial más arriba
+    const startY = height * 0.15;
+    const spacing = fontSizePrincipal * 1.2;
 
-    // BLOQUE 1: LA PREGUNTA
     ctx.font = `bold ${fontSizePrincipal}px 'Press Start 2P'`;
-    ctx.fillText("¿QUIERES", width / 2, centroY - (fontSizePrincipal * 1.5));
-    ctx.fillText("SER MI", width / 2, centroY);
-    ctx.fillText("VALENTIN?", width / 2, centroY + (fontSizePrincipal * 1.5));
+    
+    // Separamos en más líneas para que cada palabra sea GIGANTE
+    ctx.fillText("¿QUIERES", width / 2, startY);
+    ctx.fillText("SER", width / 2, startY + spacing);
+    ctx.fillText("MI SAN", width / 2, startY + spacing * 2);
+    ctx.fillText("VALENTIN?", width / 2, startY + spacing * 3);
 
-    // BLOQUE 2: LA PROMESA (Ahora mucho más grande)
+    // Frase secundaria también grande
     ctx.font = `bold ${fontSizeSub}px 'Press Start 2P'`;
-    ctx.fillStyle = "#ff758f"; 
-    ctx.fillText("TE ASEGURO QUE", width / 2, centroY + (fontSizePrincipal * 2.5) + 20);
-    ctx.fillText("VALDRA LA PENA", width / 2, centroY + (fontSizePrincipal * 2.5) + fontSizeSub + 40);
+    ctx.fillStyle = "#ff758f";
+    ctx.fillText("TE ASEGURO QUE", width / 2, startY + spacing * 4.2);
+    ctx.fillText("VALDRA LA PENA", width / 2, startY + spacing * 4.2 + fontSizeSub * 1.5);
 
     const data = ctx.getImageData(0, 0, width, height).data;
     let positions = [];
     
-    // Escaneo pixel a pixel para nitidez absoluta
+    // Escaneo pixel a pixel (nitidez total)
     for (let y = 0; y < height; y += 1) {
         for (let x = 0; x < width; x += 1) {
             if (data[(y * width + x) * 4 + 3] > 128) {
@@ -125,17 +129,16 @@ function formarTexto() {
         if (positions[i]) {
             particles[i].destX = positions[i].x;
             particles[i].destY = positions[i].y;
-            particles[i].color = i > positions.length * 0.8 ? "#ff758f" : "#ff4d6d"; 
-            particles[i].size = 2.5; // Partículas más gruesas para letras más nítidas
+            // Color según si es la pregunta o la promesa
+            particles[i].color = positions[i].y > (startY + spacing * 3.5) ? "#ff758f" : "#ff4d6d";
             particles[i].stopped = false;
         } else {
             particles[i].destX = Math.random() * width;
-            particles[i].destY = height + 100; 
+            particles[i].destY = height + 100;
             particles[i].color = "transparent";
         }
     }
 
-    // Retrasamos un poco los botones para que Nancy pueda leer el texto primero
     setTimeout(() => {
         document.getElementById('contenedor-respuestas').classList.remove('oculto');
     }, 3000);
@@ -147,12 +150,12 @@ function finalizar(colorElegido) {
     particles.forEach(p => {
         p.stopped = false;
         p.color = colorElegido === 'rojo' ? '#ff0000' : '#8b4513';
-        p.destY += 30;
+        p.destY += 20;
     });
 }
 
 function animate() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.fillRect(0, 0, width, height);
     particles.forEach(p => {
         p.update();
