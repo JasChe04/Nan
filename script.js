@@ -10,7 +10,6 @@ function resize() {
     height = window.innerHeight;
     canvas.width = width;
     canvas.height = height;
-    if (isForming) formarTexto(); // Re-ajusta si se gira el celular
 }
 window.addEventListener('resize', resize);
 resize();
@@ -51,8 +50,8 @@ class Particle {
         this.destX = this.x;
         this.destY = this.y;
         this.color = '#ff758f';
-        this.size = 1.8; 
-        this.ease = 0.12; // Más rápido para mayor nitidez
+        this.size = 1.8;
+        this.ease = 0.15; // Un poco más rápido para que se sienta firme
     }
     draw() {
         ctx.fillStyle = this.color;
@@ -66,8 +65,8 @@ class Particle {
 
 function initParticles() {
     particles = [];
-    // 4500 puntos aseguran que la palabra se vea rellena y nítida
-    for (let i = 0; i < 4500; i++) particles.push(new Particle());
+    // Aumentamos a 6000 puntos para que "MI" se rellene por completo
+    for (let i = 0; i < 6000; i++) particles.push(new Particle());
 }
 
 function formarTexto() {
@@ -75,29 +74,36 @@ function formarTexto() {
     document.getElementById('pantalla-2').classList.add('oculto');
     
     ctx.clearRect(0, 0, width, height);
-    const fontSize = width < 500 ? 22 : 35;
-    ctx.font = `bold ${fontSize}px 'Press Start 2P'`;
+    
+    // Tamaños diferenciados para que el MI sea grande y nítido
+    const sizeGrande = width < 500 ? 24 : 35;
+    const sizeMI = width < 500 ? 32 : 45; // El "MI" será más grande para capturar más puntos
+    
     ctx.textAlign = "center";
     ctx.fillStyle = "white";
     
-    const lineas = ["¿QUIERES", "SER M I", "SAN VALENTIN?"];
-    lineas.forEach((linea, index) => {
-        ctx.fillText(linea, width / 2, (height / 2.6) + (index * (fontSize + 18)));
-    });
+    // Dibujamos las líneas con diferentes tamaños
+    ctx.font = `bold ${sizeGrande}px 'Press Start 2P'`;
+    ctx.fillText("¿QUIERES", width / 2, height / 2.8);
+    
+    ctx.font = `bold ${sizeMI}px 'Press Start 2P'`;
+    ctx.fillText("SER MI", width / 2, height / 2.8 + (sizeGrande + 25));
+    
+    ctx.font = `bold ${sizeGrande}px 'Press Start 2P'`;
+    ctx.fillText("VALENTIN?", width / 2, height / 2.8 + (sizeGrande + sizeMI + 40));
 
+    // ESCANEO DE ALTA DEFINICIÓN (Paso 2: revisa casi cada pixel)
     const data = ctx.getImageData(0, 0, width, height).data;
     let positions = [];
-    
-    // Escaneo de alta precisión (cada 3 píxeles en lugar de 4)
-    for (let y = 0; y < height; y += 3) {
-        for (let x = 0; x < width; x += 3) {
+    for (let y = 0; y < height; y += 2) { 
+        for (let x = 0; x < width; x += 2) {
             if (data[(y * width + x) * 4 + 3] > 128) {
                 positions.push({ x, y });
             }
         }
     }
 
-    // Mezclar posiciones para un efecto de vuelo más natural
+    // Mezclamos posiciones para el efecto visual
     positions.sort(() => Math.random() - 0.5);
 
     for (let i = 0; i < particles.length; i++) {
@@ -105,22 +111,32 @@ function formarTexto() {
             particles[i].destX = positions[i].x;
             particles[i].destY = positions[i].y;
             particles[i].color = "#ff4d6d";
-            particles[i].size = 2;
+            particles[i].size = 2.2; // Puntos ligeramente más grandes para nitidez
         } else {
-            // Puntos sobrantes se desvanecen en el fondo
             particles[i].destX = Math.random() * width;
             particles[i].destY = Math.random() * height;
-            particles[i].color = "#1a0000";
+            particles[i].color = "#150000";
             particles[i].size = 1;
         }
     }
+
+    setTimeout(() => {
+        document.getElementById('contenedor-respuestas').classList.remove('oculto');
+    }, 1800);
+}
+
+function finalizar(colorElegido) {
+    document.getElementById('contenedor-respuestas').classList.add('oculto');
+    document.getElementById('pantalla-final').classList.remove('oculto');
+    particles.forEach(p => {
+        p.color = colorElegido === 'rojo' ? '#ff0000' : '#8b4513';
+        p.destY += 40;
+    });
 }
 
 function animate() {
-    // Fondo negro con menos transparencia para evitar rastros borrosos
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.fillRect(0, 0, width, height);
     particles.forEach(p => { p.update(); p.draw(); });
     requestAnimationFrame(animate);
-
 }
