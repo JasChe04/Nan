@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Nancy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <canvas id="canvas-puntos"></canvas>
+
+    <div id="pantalla-1" class="pantalla">
+        <h1 class="texto-bienvenida">Hola Nancy<br>te tengo una<br>sorpresa</h1>
+        <button class="btn-click" onclick="irAClave()">CLICK AQUÍ</button>
+    </div>
+
+    <div id="pantalla-clave" class="pantalla oculto">
+        <h2 class="titulo-clave">COLOCA LA CLAVE SECRETA</h2>
+        <div id="display-clave">--</div>
+        <div class="teclado">
+            <button onclick="presionarNumero(1)">1</button>
+            <button onclick="presionarNumero(2)">2</button>
+            <button onclick="presionarNumero(3)">3</button>
+            <button onclick="presionarNumero(4)">4</button>
+            <button onclick="presionarNumero(5)">5</button>
+            <button onclick="presionarNumero(6)">6</button>
+            <button onclick="presionarNumero(7)">7</button>
+            <button onclick="presionarNumero(8)">8</button>
+            <button onclick="presionarNumero(9)">9</button>
+            <button onclick="borrarClave()">C</button>
+            <button onclick="presionarNumero(0)">0</button>
+        </div>
+    </div>
+
+    <div id="pantalla-2" class="pantalla oculto">
+        <div class="corazon-interactivo" onclick="formarTexto()">❤️</div>
+        <p class="texto-instruccion">TOCA EL CORAZÓN</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

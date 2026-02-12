@@ -1,0 +1,87 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden;
+    touch-action: none;
+}
+
+#canvas-puntos {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.pantalla {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+    transition: opacity 0.5s ease;
+}
+
+.oculto { opacity: 0; pointer-events: none; }
+
+.texto-bienvenida { font-size: 14px; line-height: 2.2; margin-bottom: 40px; }
+
+.btn-click {
+    background-color: #ff4d6d;
+    color: white;
+    border: none;
+    padding: 18px 25px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    box-shadow: 0 6px 0 #a4133c;
+    border-radius: 4px;
+    animation: bounce 1s infinite alternate;
+}
+
+.titulo-clave { font-size: 11px; color: #ff0000; margin-bottom: 25px; }
+#display-clave {
+    font-size: 35px;
+    color: #ff0000;
+    margin-bottom: 25px;
+    letter-spacing: 8px;
+    border-bottom: 3px solid #ff0000;
+    min-width: 120px;
+}
+
+.teclado {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 260px;
+}
+
+.teclado button {
+    background: #000;
+    border: 2px solid #ff0000;
+    color: #ff0000;
+    padding: 15px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+}
+
+.teclado button:active { background: #ff0000; color: #000; }
+
+.corazon-interactivo { font-size: 70px; animation: latido 0.8s infinite alternate ease-in-out; }
+.texto-instruccion { margin-top: 25px; font-size: 10px; color: #ff758f; }
+
+@keyframes latido { from { transform: scale(1); } to { transform: scale(1.2); } }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
