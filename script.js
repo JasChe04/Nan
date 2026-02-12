@@ -5,11 +5,19 @@ let width, height;
 let isForming = false;
 let claveIngresada = "";
 
+// Ajuste especial para pantallas Retina (iPhone 14)
 function resize() {
+    const scale = window.devicePixelRatio || 1;
     width = window.innerWidth;
     height = window.innerHeight;
-    canvas.height = height;
-    canvas.width = width;
+    
+    // Multiplicamos el canvas por la escala del iPhone para nitidez absoluta
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    ctx.scale(scale, scale);
+    
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
 }
 window.addEventListener('resize', resize);
 resize();
@@ -50,13 +58,13 @@ class Particle {
         this.destX = this.x;
         this.destY = this.y;
         this.color = '#ff758f';
-        this.size = 2.5; // Puntos más grandes para evitar huecos
+        this.size = 2.8; // Aumentamos el tamaño del punto para que sea más legible
         this.ease = 0.12; 
         this.stopped = false;
     }
     draw() {
         ctx.fillStyle = this.color;
-        // Dibujamos rectángulos para un look pixel más sólido
+        // Dibujamos rectángulos para un look pixel sólido y nítido
         ctx.fillRect(this.x, this.y, this.size, this.size);
     }
     update() {
@@ -75,7 +83,8 @@ class Particle {
 
 function initParticles() {
     particles = [];
-    for (let i = 0; i < 10000; i++) particles.push(new Particle());
+    // 12,000 partículas para rellenar letras masivas
+    for (let i = 0; i < 12000; i++) particles.push(new Particle());
 }
 
 function formarTexto() {
@@ -84,41 +93,44 @@ function formarTexto() {
     
     ctx.clearRect(0, 0, width, height);
     
-    // CALCULO DE TAMAÑO GIGANTE
-    // Dividimos por el número de letras de la palabra más larga para que quepa justo
-    const fontSizePrincipal = Math.floor(width / 9); 
-    const fontSizeSub = Math.floor(width / 14); 
+    // TAMAÑO MASIVO PARA IPHONE 14
+    // Usamos el ancho disponible para que la palabra más larga ocupe el 85% del ancho
+    const fontSizePrincipal = Math.floor(width * 0.11); 
+    const fontSizeSub = Math.floor(width * 0.05); 
     
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "white";
     
-    // Ajustamos la posición inicial más arriba
-    const startY = height * 0.15;
-    const spacing = fontSizePrincipal * 1.2;
+    // Posicionamiento para iPhone (pantalla alargada)
+    const startY = height * 0.12;
+    const spacing = fontSizePrincipal * 1.3;
 
     ctx.font = `bold ${fontSizePrincipal}px 'Press Start 2P'`;
     
-    // Separamos en más líneas para que cada palabra sea GIGANTE
+    // Dividimos en líneas cortas para poder agrandar la letra al máximo
     ctx.fillText("¿QUIERES", width / 2, startY);
     ctx.fillText("SER", width / 2, startY + spacing);
     ctx.fillText("MI SAN", width / 2, startY + spacing * 2);
-    ctx.fillText("VALENTIN?", width / 2, startY + spacing * 3);
+    ctx.fillText("VALENTIN?", width / 2, startY + spacing * 3.1);
 
-    // Frase secundaria también grande
+    // Frase secundaria en 2 líneas también grande
     ctx.font = `bold ${fontSizeSub}px 'Press Start 2P'`;
     ctx.fillStyle = "#ff758f";
-    ctx.fillText("TE ASEGURO QUE", width / 2, startY + spacing * 4.2);
-    ctx.fillText("VALDRA LA PENA", width / 2, startY + spacing * 4.2 + fontSizeSub * 1.5);
+    const subStartY = startY + spacing * 4.5;
+    ctx.fillText("TE ASEGURO QUE", width / 2, subStartY);
+    ctx.fillText("VALDRA LA PENA", width / 2, subStartY + fontSizeSub * 1.8);
 
-    const data = ctx.getImageData(0, 0, width, height).data;
+    const data = ctx.getImageData(0, 0, width * (window.devicePixelRatio || 1), height * (window.devicePixelRatio || 1)).data;
     let positions = [];
     
-    // Escaneo pixel a pixel (nitidez total)
-    for (let y = 0; y < height; y += 1) {
-        for (let x = 0; x < width; x += 1) {
-            if (data[(y * width + x) * 4 + 3] > 128) {
-                positions.push({ x, y });
+    const dpr = window.devicePixelRatio || 1;
+    // Escaneo optimizado para iPhone
+    for (let y = 0; y < height * dpr; y += 2 * dpr) {
+        for (let x = 0; x < width * dpr; x += 2 * dpr) {
+            const index = (y * width * dpr + x) * 4;
+            if (data[index + 3] > 128) {
+                positions.push({ x: x / dpr, y: y / dpr });
             }
         }
     }
@@ -129,8 +141,7 @@ function formarTexto() {
         if (positions[i]) {
             particles[i].destX = positions[i].x;
             particles[i].destY = positions[i].y;
-            // Color según si es la pregunta o la promesa
-            particles[i].color = positions[i].y > (startY + spacing * 3.5) ? "#ff758f" : "#ff4d6d";
+            particles[i].color = positions[i].y > subStartY - 20 ? "#ff758f" : "#ff4d6d";
             particles[i].stopped = false;
         } else {
             particles[i].destX = Math.random() * width;
@@ -141,7 +152,7 @@ function formarTexto() {
 
     setTimeout(() => {
         document.getElementById('contenedor-respuestas').classList.remove('oculto');
-    }, 3000);
+    }, 3500);
 }
 
 function finalizar(colorElegido) {
@@ -150,12 +161,12 @@ function finalizar(colorElegido) {
     particles.forEach(p => {
         p.stopped = false;
         p.color = colorElegido === 'rojo' ? '#ff0000' : '#8b4513';
-        p.destY += 20;
+        p.destY += 25;
     });
 }
 
 function animate() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
     ctx.fillRect(0, 0, width, height);
     particles.forEach(p => {
         p.update();
